@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Loading from "./components/common/Loading"
 import Navbar from "./components/layout/NavBar"
+import { useDispatch } from "react-redux"
+import { getCurrentUser } from "./features/auth/authSlice";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(getCurrentUser())

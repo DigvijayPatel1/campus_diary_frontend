@@ -7,9 +7,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(t);
-  }, []);
+    dispatch(getCurrentUser())
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [dispatch]);
 
   if (loading) return <Loading />;
 

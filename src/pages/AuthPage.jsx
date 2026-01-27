@@ -61,10 +61,7 @@ const AuthPage = ({ type }) => {
       }));
     }
   };
-
-  console.log("Is Login:", isLogin)
-  console.log("Message:", message)
-
+  
   //SUCCESS STATE: If registered successfully, show "Check Email" screen instead of form
   if (!isLogin && message) {
     return (

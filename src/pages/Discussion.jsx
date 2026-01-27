@@ -234,11 +234,11 @@ const Discussion = () => {
                 <p className="font-semibold text-slate-900 text-sm">
                   {comment.author?.name || "Unknown"}
                 </p>
-                {comment.parentComment && (
+                {/* {comment.parentComment && (
                   <p className="text-xs text-blue-600">
                     Replying to a comment
                   </p>
-                )}
+                )} */}
               </div>
               {(comment.author?._id === user?._id || comment.author === user?._id) && (
                 <button

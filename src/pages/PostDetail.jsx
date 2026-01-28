@@ -84,7 +84,7 @@ const PostDetail = () => {
           id: post._id,
           content: replyText,
           type: "interview",
-          parentComment: parentCommentId, 
+          parentCommentId: parentCommentId,
         })
       );
       setReplyText("");

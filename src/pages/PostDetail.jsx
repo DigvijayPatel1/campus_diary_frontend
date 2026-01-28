@@ -14,6 +14,7 @@ import {
 } from "../features/comment/commentSlice";
 import { savePost } from "../features/auth/authSlice";
 import EditInterviewForm from "../components/features/post/EditInterviewForm"; 
+import { AVATAR_MAP } from "../constant.js";
 
 import {
   ArrowLeft,
@@ -28,6 +29,8 @@ import {
   Trash2,
   Linkedin,
   Edit2,
+  Send,
+  X
 } from "lucide-react";
 
 const PostDetail = () => {
@@ -38,7 +41,7 @@ const PostDetail = () => {
   const { currentInterview: post, loading: postLoading } = useSelector(
     (state) => state.interviews
   );
-  const { comments } = useSelector((state) => state.comments);
+  const { comments = [] } = useSelector((state) => state.comments);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const [commentText, setCommentText] = useState("");
@@ -74,6 +77,21 @@ const PostDetail = () => {
     }
   };
 
+  const handleReplySubmit = (parentCommentId) => {
+    if (replyText.trim()) {
+      dispatch(
+        addComment({
+          id: post._id,
+          content: replyText,
+          type: "interview",
+          parentComment: parentCommentId, 
+        })
+      );
+      setReplyText("");
+      setReplyingTo(null);
+    }
+  };
+
   const handleDeleteComment = (commentId) => {
     if (window.confirm("Delete this comment?")) {
       dispatch(deleteComment({ id: post._id, commentId, type: "interview" }));
@@ -98,6 +116,77 @@ const PostDetail = () => {
     } catch (err) {
       alert(err);
     }
+  };
+
+  const CommentItem = ({ comment, depth = 0 }) => {
+    // Filter replies for THIS comment
+    const replies = comments ? comments.filter((c) => c.parentComment === comment._id) : [];
+    const isReplying = replyingTo === comment._id;
+
+    return (
+      <div className={`flex flex-col ${depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"}`}>
+        <div className="flex gap-3 group/comment">
+          {/* Avatar */}
+          <button onClick={() => navigate(comment.author?._id === user?._id ? "/profile" : `/user/${comment.author?._id}`)} className="shrink-0 hover:opacity-80">
+            <img src={AVATAR_MAP[comment.author?.avatar] || AVATAR_MAP["a1"]} alt={comment.author?.name} className="w-8 h-8 rounded-full shrink-0 object-cover" />
+          </button>
+          
+          <div className="min-w-0 flex-1">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <p className="text-sm font-bold text-slate-900">{comment.author?.name || "Unknown"}</p>
+              {comment.author?._id === user?._id && (
+                <button onClick={() => handleDeleteComment(comment._id)} className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+            
+            {/* Content */}
+            <p className="text-sm text-slate-600 mb-1">{comment.content}</p>
+
+            {/* Reply Button */}
+            {isAuthenticated && (
+              <button
+                onClick={() => { setReplyingTo(comment._id); setReplyText(""); }}
+                className="text-xs text-slate-500 hover:text-emerald-600 font-medium"
+              >
+                Reply
+              </button>
+            )}
+
+            {/* Reply Input Box */}
+            {isReplying && (
+              <div className="mt-2 flex gap-2 items-start animate-fadeIn">
+                <input
+                  type="text"
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={`Reply to ${comment.author?.name}...`}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                  autoFocus
+                />
+                <button onClick={() => handleReplySubmit(comment._id)} className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                  <Send size={14} />
+                </button>
+                <button onClick={() => setReplyingTo(null)} className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recursively render replies */}
+        {replies.length > 0 && (
+          <div className="space-y-2">
+            {replies.map((reply) => (
+              <CommentItem key={reply._id} comment={reply} depth={depth + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -270,27 +359,13 @@ const PostDetail = () => {
                     <h4 className="font-bold text-slate-800 mb-4">
                       Discussion ({Array.isArray(comments) ? comments.length : 0})
                     </h4>
-                    {/* ... (Comments rendering logic kept same as before) ... */}
                     <div className="space-y-4 mb-6">
                       {Array.isArray(comments) &&
                         comments
-                          .filter((c) => !c.parentComment)
+                          .filter((c) => !c.parentComment) // Get top-level comments
                           .map((c) => (
-                            <div key={c._id} className="flex gap-3 group/comment">
-                              {/* ... Comment rendering ... */}
-                              {/* (I omitted the detailed comment rendering for brevity, 
-                                  it's the same as your provided code) */}
-                               <button onClick={() => navigate(c.author?._id === user?._id ? '/profile' : `/user/${c.author?._id}`)} className="shrink-0 hover:opacity-80">
-                                <img src={`/avatar/${c.author?.avatar}.png` || "https://via.placeholder.com/32"} alt={c.author?.name} className="w-8 h-8 rounded-full shrink-0 object-cover" />
-                              </button>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex justify-between items-start">
-                                  <div><p className="text-sm font-bold text-slate-900">{c.author?.name || "Unknown"}</p></div>
-                                  {(c.author?._id === user?._id) && (<button onClick={() => handleDeleteComment(c._id)} className="text-red-500 p-1"><Trash2 size={14} /></button>)}
-                                </div>
-                                <p className="text-sm text-slate-600 mb-2">{c.content}</p>
-                              </div>
-                            </div>
+                            // Render the recursive component we created above
+                            <CommentItem key={c._id} comment={c} />
                           ))}
                     </div>
                     <form onSubmit={handleCommentSubmit} className="flex gap-2">

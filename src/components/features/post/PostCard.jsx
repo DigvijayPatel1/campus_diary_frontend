@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import {
   Heart,
   MessageCircle,
@@ -23,8 +23,9 @@ const PostCard = ({ post }) => {
 
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const savedPosts = user?.savedPosts || [];
-  
-  const isSaved = savedPosts.some((id) => id?.toString() === post._id?.toString());
+  const isSaved = savedPosts.some(
+    (id) => id?.toString() === post._id?.toString()
+  );
 
   const handleLikeInterview = async (e, interviewId) => {
     e.preventDefault();
@@ -35,15 +36,12 @@ const PostCard = ({ post }) => {
       return;
     }
 
-    // 1. Trigger Animation
     setHeartAnimation((prev) => ({ ...prev, [interviewId]: true }));
-
     dispatch(optimisticToggleInterviewLike({ interviewId }));
 
     try {
       await dispatch(toggleInterviewLike(interviewId)).unwrap();
-    } catch (err) {
-      // If API fails, rollback the Redux change
+    } catch {
       dispatch(optimisticToggleInterviewLike({ interviewId }));
     }
 
@@ -74,21 +72,24 @@ const PostCard = ({ post }) => {
 
   return (
     <div onClick={handleCardClick} className="block h-full cursor-pointer">
-      <div className="group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all overflow-hidden flex flex-col h-full w-full">
+      <div className="group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all overflow-hidden flex flex-col h-full w-full active:scale-[0.99]">
 
-        {/* Save Status Icon */}
+        {/* Save Button */}
         <button
           onClick={handleSaveToggle}
           className={`absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-slate-50 transition ${
-            isSaved ? "text-emerald-600" : "text-slate-300 hover:text-emerald-600"
+            isSaved
+              ? "text-emerald-600"
+              : "text-slate-300 hover:text-emerald-600"
           }`}
-          title={isSaved ? "Unsave" : "Save"}
         >
           <Bookmark size={18} fill={isSaved ? "currentColor" : "none"} />
         </button>
 
+        {/* Main Content */}
         <div className="p-4 md:p-5 flex-grow">
-          <div className="flex justify-between items-start mb-3">
+          {/* Tags */}
+          <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
             <div className="flex flex-wrap gap-2">
               <span
                 className={`px-2 py-1 text-xs font-semibold rounded-full border ${
@@ -101,15 +102,18 @@ const PostCard = ({ post }) => {
               >
                 {post.domain}
               </span>
+
               <span className="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-600 rounded-full border border-slate-200">
                 {post.author.branch}
               </span>
             </div>
-            <span className="text-xs text-slate-400 whitespace-nowrap ml-1">
+
+            <span className="text-xs text-slate-400 whitespace-nowrap">
               {post.timestamp}
             </span>
           </div>
 
+          {/* Title */}
           <h3 className="text-lg md:text-xl font-bold text-slate-800 group-hover:text-emerald-700 transition-colors mb-1 truncate">
             {post.company}
           </h3>
@@ -118,6 +122,7 @@ const PostCard = ({ post }) => {
             {post.role}
           </p>
 
+          {/* Author + Offer + Interview */}
           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
             <img
               src={AVATAR_MAP[post.author?.avatar] || AVATAR_MAP["a1"]}
@@ -125,24 +130,35 @@ const PostCard = ({ post }) => {
               className="w-8 h-8 rounded-full border border-slate-200 object-cover"
               onError={(e) => (e.target.src = AVATAR_MAP["a1"])}
             />
+
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-slate-900 truncate">
                 {post.author.name}
               </p>
               <p className="text-xs text-slate-500 truncate">{post.type}</p>
             </div>
-            {post.offerDetails && (
-              <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
-                <IndianRupee size={10} /> {post.offerDetails}
-              </div>
-            )}
+
+            {/* Offer + Interview */}
+            <div className="flex flex-col items-end gap-1">
+              {post.offerDetails && (
+                <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
+                  <IndianRupee size={12} /> {post.offerDetails}
+                </div>
+              )}
+
+              {post.interviewDate && (
+                <div className="flex items-center gap-1 text-xs text-slate-400 transition-all duration-300 group-hover:translate-y-2">
+                  <Calendar size={12} /> {post.interviewDate}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* Footer */}
         <div className="bg-slate-50 px-4 md:px-5 py-3 flex items-center justify-between text-slate-500 text-sm border-t border-slate-100">
           <div className="flex gap-4">
-            
-            {/* Like Button */}
+            {/* Like */}
             <div className="relative">
               <button
                 onClick={(e) => handleLikeInterview(e, post._id)}
@@ -151,12 +167,12 @@ const PostCard = ({ post }) => {
                 <Heart
                   size={16}
                   className={`transition ${
-                    post.isLiked 
+                    post.isLiked
                       ? "text-red-500 fill-red-500"
                       : "text-slate-500"
                   }`}
                 />
-                {post.likesCount ?? 0} 
+                {post.likesCount ?? 0}
               </button>
 
               {heartAnimation[post._id] && (
@@ -170,21 +186,16 @@ const PostCard = ({ post }) => {
               )}
             </div>
 
+            {/* Comments */}
             <span className="flex items-center gap-1">
               <MessageCircle size={16} /> {post.commentCount || 0}
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {post.interviewDate && (
-              <span className="flex items-center gap-1 text-slate-400 text-xs">
-                <Calendar size={14} /> {post.interviewDate}
-              </span>
-            )}
-            <span className="flex items-center gap-1 text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-              Read <ChevronRight size={16} />
-            </span>
-          </div>
+          {/* Read */}
+          <span className="flex items-center gap-1 text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            Read <ChevronRight size={16} />
+          </span>
         </div>
       </div>
     </div>

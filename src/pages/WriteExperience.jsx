@@ -27,7 +27,7 @@ const WriteExperience = () => {
       type: "Full Time",
       rounds: [{ title: "Round 1", description: "" }],
       hr: "",
-      offer: "",
+      offerDetails: "",
       tips: "",
       interviewDate: "",
     },
@@ -206,7 +206,7 @@ const WriteExperience = () => {
               Offer (Optional)
             </label>
             <input
-              {...register("offer")}
+              {...register("offerDetails")}
               type="text"
               className="w-full p-3 bg-green-50/50 border border-green-200 rounded-lg outline-none"
               placeholder="12 LPA"

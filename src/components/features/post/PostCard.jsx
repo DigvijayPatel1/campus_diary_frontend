@@ -139,19 +139,26 @@ const PostCard = ({ post }) => {
             </div>
 
             {/* Offer + Interview */}
-            <div className="flex flex-col items-end gap-1">
+            <div className="flex flex-col items-end gap-1.5 min-w-[90px] text-right">
+  
+              {/* Offer Badge */}
               {post.offerDetails && (
-                <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
-                  <IndianRupee size={12} /> {post.offerDetails}
+                <div className="flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-semibold text-emerald-700 border border-emerald-100 shadow-sm">
+                  <IndianRupee size={12} />
+                  <span>{post.offerDetails}</span>
                 </div>
               )}
 
+              {/* Interview Date */}
               {post.interviewDate && (
-                <div className="flex items-center gap-1 text-xs text-slate-400 transition-all duration-300 group-hover:translate-y-2">
-                  <Calendar size={12} /> {post.interviewDate}
+                <div className="flex items-center gap-1 text-[11px] text-slate-500 transition-all duration-300 group-hover:translate-y-1">
+                  <Calendar size={12} />
+                  <span>{post.interviewDate}</span>
                 </div>
               )}
+
             </div>
+
           </div>
         </div>
 

@@ -132,7 +132,7 @@ const PostCard = ({ post }) => {
               <p className="text-xs text-slate-500 truncate">{post.type}</p>
             </div>
             {post.offerDetails && (
-              <div className="hidden sm:flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
+              <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
                 <IndianRupee size={10} /> {post.offerDetails}
               </div>
             )}
@@ -175,9 +175,9 @@ const PostCard = ({ post }) => {
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2">
             {post.interviewDate && (
-              <span className="hidden sm:flex items-center gap-1 text-slate-400">
+              <span className="flex items-center gap-1 text-slate-400 text-xs">
                 <Calendar size={14} /> {post.interviewDate}
               </span>
             )}

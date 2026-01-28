@@ -13,7 +13,7 @@ import {
   deleteComment,
 } from "../features/comment/commentSlice";
 import { savePost } from "../features/auth/authSlice";
-import EditInterviewForm from "../components/features/post/EditInterviewForm"; 
+import EditInterviewForm from "../components/features/post/EditInterviewForm";
 import { AVATAR_MAP } from "../constant.js";
 
 import {
@@ -30,7 +30,7 @@ import {
   Linkedin,
   Edit2,
   Send,
-  X
+  X,
 } from "lucide-react";
 
 const PostDetail = () => {
@@ -39,7 +39,7 @@ const PostDetail = () => {
   const dispatch = useDispatch();
 
   const { currentInterview: post, loading: postLoading } = useSelector(
-    (state) => state.interviews
+    (state) => state.interviews,
   );
   const { comments = [] } = useSelector((state) => state.comments);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -71,7 +71,7 @@ const PostDetail = () => {
     e.preventDefault();
     if (commentText.trim()) {
       dispatch(
-        addComment({ id: post._id, content: commentText, type: "interview" })
+        addComment({ id: post._id, content: commentText, type: "interview" }),
       );
       setCommentText("");
     }
@@ -85,7 +85,7 @@ const PostDetail = () => {
           content: replyText,
           type: "interview",
           parentCommentId: parentCommentId,
-        })
+        }),
       );
       setReplyText("");
       setReplyingTo(null);
@@ -120,35 +120,60 @@ const PostDetail = () => {
 
   const CommentItem = ({ comment, depth = 0 }) => {
     // Filter replies for THIS comment
-    const replies = comments ? comments.filter((c) => c.parentComment === comment._id) : [];
+    const replies = comments
+      ? comments.filter((c) => c.parentComment === comment._id)
+      : [];
     const isReplying = replyingTo === comment._id;
 
     return (
-      <div className={`flex flex-col ${depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"}`}>
+      <div
+        className={`flex flex-col ${depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"}`}
+      >
         <div className="flex gap-3 group/comment">
           {/* Avatar */}
-          <button onClick={() => navigate(comment.author?._id === user?._id ? "/profile" : `/user/${comment.author?._id}`)} className="shrink-0 hover:opacity-80">
-            <img src={AVATAR_MAP[comment.author?.avatar] || AVATAR_MAP["a1"]} alt={comment.author?.name} className="w-8 h-8 rounded-full shrink-0 object-cover" />
+          <button
+            onClick={() =>
+              navigate(
+                comment.author?._id === user?._id
+                  ? "/profile"
+                  : `/user/${comment.author?._id}`,
+              )
+            }
+            className="shrink-0 hover:opacity-80"
+          >
+            <img
+              src={AVATAR_MAP[comment.author?.avatar] || AVATAR_MAP["a1"]}
+              alt={comment.author?.name}
+              className="w-8 h-8 rounded-full shrink-0 object-cover"
+            />
           </button>
-          
+
           <div className="min-w-0 flex-1">
             {/* Header */}
             <div className="flex justify-between items-start">
-              <p className="text-sm font-bold text-slate-900">{comment.author?.name || "Unknown"}</p>
+              <p className="text-sm font-bold text-slate-900">
+                {comment.author?.name || "Unknown"}
+              </p>
               {comment.author?._id === user?._id && (
-                <button onClick={() => handleDeleteComment(comment._id)} className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleDeleteComment(comment._id)}
+                  className="text-slate-400 hover:text-red-500 p-1 opacity-100 md:opacity-0 md:group-hover/comment:opacity-100 transition-opacity"
+                >
                   <Trash2 size={14} />
                 </button>
               )}
             </div>
-            
+
             {/* Content */}
             <p className="text-sm text-slate-600 mb-1">{comment.content}</p>
 
             {/* Reply Button */}
             {isAuthenticated && (
               <button
-                onClick={() => { setReplyingTo(comment._id); setReplyText(""); }}
+                onClick={() => {
+                  setReplyingTo(comment._id);
+                  setReplyText("");
+                }}
                 className="text-xs text-slate-500 hover:text-emerald-600 font-medium"
               >
                 Reply
@@ -166,10 +191,16 @@ const PostDetail = () => {
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500"
                   autoFocus
                 />
-                <button onClick={() => handleReplySubmit(comment._id)} className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                <button
+                  onClick={() => handleReplySubmit(comment._id)}
+                  className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                >
                   <Send size={14} />
                 </button>
-                <button onClick={() => setReplyingTo(null)} className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300">
+                <button
+                  onClick={() => setReplyingTo(null)}
+                  className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300"
+                >
                   <X size={14} />
                 </button>
               </div>
@@ -226,7 +257,8 @@ const PostDetail = () => {
               </div>
 
               {/*EDIT/DELETE BUTTON (Top Right of Blue Box) */}
-              {(user?._id === post.author._id || user?.name === post.author.name) && (
+              {(user?._id === post.author._id ||
+                user?.name === post.author.name) && (
                 <div className="absolute top-4 right-4 z-20 flex gap-2">
                   <button
                     onClick={() => setIsEditing(true)}
@@ -357,7 +389,8 @@ const PostDetail = () => {
                   {/* Comments Section */}
                   <div className="mt-10 pt-8 border-t border-slate-100">
                     <h4 className="font-bold text-slate-800 mb-4">
-                      Discussion ({Array.isArray(comments) ? comments.length : 0})
+                      Discussion (
+                      {Array.isArray(comments) ? comments.length : 0})
                     </h4>
                     <div className="space-y-4 mb-6">
                       {Array.isArray(comments) &&
@@ -376,7 +409,10 @@ const PostDetail = () => {
                         placeholder="Ask a question..."
                         className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm outline-none"
                       />
-                      <button type="submit" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                      <button
+                        type="submit"
+                        className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                      >
                         Post
                       </button>
                     </form>
@@ -388,7 +424,13 @@ const PostDetail = () => {
                   <div className="sticky top-24">
                     <div className="text-center mb-6">
                       <button
-                        onClick={() => navigate(post.author._id === user?._id ? '/profile' : `/user/${post.author._id}`)}
+                        onClick={() =>
+                          navigate(
+                            post.author._id === user?._id
+                              ? "/profile"
+                              : `/user/${post.author._id}`,
+                          )
+                        }
                         className="inline-block hover:opacity-80 transition-opacity"
                       >
                         <img
@@ -410,12 +452,22 @@ const PostDetail = () => {
                       {/* Social Links */}
                       <div className="flex justify-center gap-3 mt-4 mb-6">
                         {post.author.socialLinks?.linkedIn && (
-                          <a href={post.author.socialLinks.linkedIn} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-100 text-blue-700 rounded-full">
+                          <a
+                            href={post.author.socialLinks.linkedIn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-blue-100 text-blue-700 rounded-full"
+                          >
                             <Linkedin size={18} />
                           </a>
                         )}
                         {post.author.socialLinks?.instagram && (
-                          <a href={post.author.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-2 bg-pink-100 text-pink-700 rounded-full">
+                          <a
+                            href={post.author.socialLinks.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-pink-100 text-pink-700 rounded-full"
+                          >
                             <Instagram size={18} />
                           </a>
                         )}
@@ -426,7 +478,13 @@ const PostDetail = () => {
                         onClick={handleLike}
                         className={`w-full py-2.5 rounded-lg border font-medium flex items-center justify-center gap-2 shadow-sm ${post.isLiked ? "bg-red-50 border-red-200 text-red-600" : "border-slate-200 bg-white text-slate-700"}`}
                       >
-                        <Heart size={18} className={post.isLiked ? "fill-red-500 text-red-500" : ""} /> {post.likesCount ?? 0} Likes
+                        <Heart
+                          size={18}
+                          className={
+                            post.isLiked ? "fill-red-500 text-red-500" : ""
+                          }
+                        />{" "}
+                        {post.likesCount ?? 0} Likes
                       </button>
                       <button
                         onClick={handleSave}

@@ -40,11 +40,11 @@ export const addComment = createAsyncThunk(
             let response;
             if (type === "tweet") {
                 response = parentCommentId 
-                    ? await api.post(`/comments/tweets/${id}/comments/${parentCommentId}/reply`, { content })
+                    ? await replyToTweetApi(id, parentCommentId, content)
                     : await addTweetCommentApi(id, content);
             } else {
                 response = parentCommentId 
-                    ? await api.post(`/comments/interviews/${id}/comments/${parentCommentId}/reply`, { content })
+                    ? await replyToInterviewApi(id, parentCommentId, content)
                     : await addInterviewCommentApi(id, content);
             }
             return response.data.data;

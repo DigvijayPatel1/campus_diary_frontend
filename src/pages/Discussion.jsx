@@ -334,7 +334,7 @@ const Discussion = () => {
         </div>
       )}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Campus Buzz</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Discussion</h2>
         <p className="text-slate-500">
           General discussions about interviews and  placements.
         </p>
@@ -424,7 +424,7 @@ const Discussion = () => {
                   )}
                 </div>
               </div>
-              <p className="text-slate-800 text-sm leading-relaxed mb-4 pl-13 ml-13">
+              <p className="text-slate-800 text-sm leading-relaxed mb-4">
                 {tweet.content}
               </p>
               <div className="flex gap-6 border-t border-slate-50 pt-3 relative">

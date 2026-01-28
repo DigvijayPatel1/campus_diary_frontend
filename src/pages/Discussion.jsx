@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Send, Trash2, Heart, MessageCircle, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   getAllTweets,
   createTweet,
   deleteTweet,
   toggleTweetLike,
-  optimisticToggleLike
+  optimisticToggleLike,
 } from "../features/tweet/tweetSlice";
 import {
   addTweetCommentApi,
@@ -75,38 +75,40 @@ const Discussion = () => {
         setTweetComments((prev) => ({
           ...prev,
           [tweetId]: prev[tweetId].filter(
-            (c) => c._id !== commentId && c.parentComment !== commentId
+            (c) => c._id !== commentId && c.parentComment !== commentId,
           ),
         }));
-        setNotification({type: "success", message: "Comment deleted successfully"});
+        setNotification({
+          type: "success",
+          message: "Comment deleted successfully",
+        });
       } catch (error) {
-        setNotification({type: "error", message: "Failed to delete comment"});
+        setNotification({ type: "error", message: "Failed to delete comment" });
       }
     }
   };
 
   const handleLikeTweet = async (tweetId) => {
+    setHeartAnimation((prev) => ({
+      ...prev,
+      [tweetId]: true,
+    }));
+
+    dispatch(optimisticToggleLike({ tweetId }));
+
+    try {
+      await dispatch(toggleTweetLike(tweetId)).unwrap();
+    } catch (err) {
+      console.error("Like API failed", err);
+    }
+
+    setTimeout(() => {
       setHeartAnimation((prev) => ({
         ...prev,
-        [tweetId]: true,
+        [tweetId]: false,
       }));
-
-      dispatch(optimisticToggleLike({ tweetId }));
-
-      try {
-        await dispatch(toggleTweetLike(tweetId)).unwrap();
-      } catch (err) {
-        console.error("Like API failed", err);
-      }
-
-      setTimeout(() => {
-        setHeartAnimation((prev) => ({
-          ...prev,
-          [tweetId]: false,
-        }));
-      }, 600);
+    }, 600);
   };
-
 
   const toggleComments = async (tweetId) => {
     if (expandedTweets.has(tweetId)) {
@@ -211,107 +213,106 @@ const Discussion = () => {
   };
 
   // Component to render a single comment with its nested replies
-  const CommentThread = ({ tweet, comment, depth = 0 }) => {
-    const replies = getRepliesForComment(tweet._id, comment._id);
-    const isReplyingToThis =
-      replyingTo?.commentId === comment._id &&
-      replyingTo?.tweetId === tweet._id;
+  const CommentItem = ({ tweetId, comment, depth = 0 }) => {
+    // Helper to find replies for this specific comment from the state
+    const allComments = tweetComments[tweetId] || [];
+    const replies = allComments.filter((c) => c.parentComment === comment._id);
+
+    // Check if the user is replying to THIS specific comment
+    const isReplying =
+      replyingTo?.commentId === comment._id && replyingTo?.tweetId === tweetId;
 
     return (
       <div
-        key={comment._id}
-        className={`${depth > 0 ? "ml-6 border-l-2 border-slate-200 pl-3" : ""}`}
+        className={`flex flex-col ${depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"}`}
       >
-        <div className="flex gap-2 p-2 bg-slate-50 rounded-lg group/comment mb-2">
-          <img
-            src={AVATAR_MAP[comment.author?.avatar] || AVATAR_MAP["a1"]}
-            alt="commenter"
-            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-          />
-          <div className="flex-1">
-            <div className="flex justify-between items-start mb-1">
-              <div>
-                <p className="font-semibold text-slate-900 text-sm">
-                  {comment.author?.name || "Unknown"}
-                </p>
-                {/* {comment.parentComment && (
-                  <p className="text-xs text-blue-600">
-                    Replying to a comment
-                  </p>
-                )} */}
-              </div>
-              {(comment.author?._id === user?._id || comment.author === user?._id) && (
+        <div className="flex gap-3 group/comment">
+          {/* Avatar */}
+          <button
+            onClick={() =>
+              navigate(
+                comment.author?._id === user?._id
+                  ? "/profile"
+                  : `/user/${comment.author?._id}`,
+              )
+            }
+            className="shrink-0 hover:opacity-80"
+          >
+            <img
+              src={AVATAR_MAP[comment.author?.avatar] || AVATAR_MAP["a1"]}
+              alt={comment.author?.name}
+              className="w-8 h-8 rounded-full shrink-0 object-cover"
+            />
+          </button>
+
+          <div className="min-w-0 flex-1">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <p className="text-sm font-bold text-slate-900">
+                {comment.author?.name || "Unknown"}
+              </p>
+              {comment.author?._id === user?._id && (
                 <button
-                  onClick={() => handleDeleteComment(tweet._id, comment._id)}
-                  title="Delete comment"
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-0.5 rounded transition-colors"
+                  onClick={() => handleDeleteComment(tweetId, comment._id)}
+                  className="text-slate-400 hover:text-red-500 p-1 opacity-100 md:opacity-0 md:group-hover/comment:opacity-100 transition-opacity"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={14} />
                 </button>
               )}
             </div>
-            <p className="text-slate-700 text-sm">{comment.content}</p>
-            {!comment.parentComment && (
+
+            {/* Content */}
+            <p className="text-sm text-slate-600 mb-1">{comment.content}</p>
+
+            {/* Reply Button */}
+            {isAuthenticated && (
               <button
-                onClick={() =>
-                  setReplyingTo({ tweetId: tweet._id, commentId: comment._id })
-                }
-                className="text-xs text-blue-500 hover:text-blue-700 mt-1"
+                onClick={() => {
+                  setReplyingTo({ tweetId, commentId: comment._id });
+                  setReplyText("");
+                }}
+                className="text-xs text-slate-500 hover:text-emerald-600 font-medium"
               >
                 Reply
               </button>
             )}
+
+            {/* Reply Input Box */}
+            {isReplying && (
+              <div className="mt-2 flex gap-2 items-start animate-fadeIn">
+                <input
+                  type="text"
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={`Reply to ${comment.author?.name}...`}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                  autoFocus
+                />
+                <button
+                  // Note: You need to implement handleReplySubmit (see step 3)
+                  onClick={() => handleReplySubmit(tweetId, comment._id)}
+                  className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                >
+                  <Send size={14} />
+                </button>
+                <button
+                  onClick={() => setReplyingTo(null)}
+                  className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Reply input box */}
-        {isReplyingToThis && (
-          <div className="flex gap-2 p-2 bg-white border border-blue-200 rounded-lg ml-6 mb-2">
-            <img
-              src={AVATAR_MAP[user?.avatar] || AVATAR_MAP["a1"]}
-              alt="your avatar"
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1 flex gap-2">
-              <input
-                type="text"
-                value={replyText[`${tweet._id}-${comment._id}`] || ""}
-                onChange={(e) =>
-                  setReplyText((prev) => ({
-                    ...prev,
-                    [`${tweet._id}-${comment._id}`]: e.target.value,
-                  }))
-                }
-                placeholder={`Reply to ${comment.author?.name}...`}
-                className="flex-1 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-sm outline-none focus:border-blue-500"
-                autoFocus
-              />
-              <button
-                onClick={() =>
-                  handleReply(tweet._id, comment._id, comment.author?.name)
-                }
-                disabled={!replyText[`${tweet._id}-${comment._id}`]?.trim()}
-                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send size={12} />
-              </button>
-              <button
-                onClick={() => setReplyingTo(null)}
-                className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Nested replies */}
+        {/* Recursively render replies */}
         {replies.length > 0 && (
           <div className="space-y-2">
             {replies.map((reply) => (
-              <CommentThread
+              <CommentItem
                 key={reply._id}
-                tweet={tweet}
+                tweetId={tweetId}
                 comment={reply}
                 depth={depth + 1}
               />
@@ -325,18 +326,20 @@ const Discussion = () => {
   return (
     <div className="max-w-2xl mx-auto w-full">
       {notification && (
-        <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${
-          notification.type === "success"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}>
+        <div
+          className={`mb-4 p-3 rounded-lg text-sm font-medium ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
           {notification.message}
         </div>
       )}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900">Discussion</h2>
         <p className="text-slate-500">
-          General discussions about interviews and  placements.
+          General discussions about interviews and placements.
         </p>
       </div>
       {isAuthenticated ? (
@@ -413,7 +416,8 @@ const Discussion = () => {
                   <span className="text-xs text-slate-400">
                     {tweet.timestamp}
                   </span>
-                  {(tweet.author?._id === user?._id || tweet.author === user?._id) && (
+                  {(tweet.author?._id === user?._id ||
+                    tweet.author === user?._id) && (
                     <button
                       onClick={() => handleDelete(tweet._id)}
                       title="Delete post"
@@ -432,16 +436,18 @@ const Discussion = () => {
                   <button
                     onClick={() => handleLikeTweet(tweet._id)}
                     className={`flex items-center gap-2 text-xs transition-colors ${
-                      tweet.isLiked ? "text-red-500" : "text-slate-500 hover:text-red-500"
+                      tweet.isLiked
+                        ? "text-red-500"
+                        : "text-slate-500 hover:text-red-500"
                     }`}
                   >
-                    <Heart 
-                      size={16} 
+                    <Heart
+                      size={16}
                       fill={tweet.isLiked ? "currentColor" : "none"} // Fills with red if liked
-                    /> 
+                    />
                     {tweet.likesCount || 0}
                   </button>
-                  
+
                   {/* Floating heart animation */}
                   {heartAnimation[tweet._id] && (
                     <div className="absolute left-6 top-0 pointer-events-none">
@@ -463,16 +469,16 @@ const Discussion = () => {
                 >
                   <MessageCircle size={16} />
                   <span className="inline-block min-w-[1.5rem] text-center">
-                    {tweetComments[tweet._id] 
-                      ? tweetComments[tweet._id].length 
-                      : (tweet.commentsCount || 0)
-                    }
+                    {tweetComments[tweet._id]
+                      ? tweetComments[tweet._id].length
+                      : tweet.commentsCount || 0}
                   </span>
                 </button>
               </div>
               {expandedTweets.has(tweet._id) && isAuthenticated && (
-                <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
-                  <div className="flex gap-2">
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  {/* 👇 1. New Input Style */}
+                  <div className="flex gap-2 mb-6">
                     <img
                       src={AVATAR_MAP[user?.avatar] || AVATAR_MAP["a1"]}
                       alt="your avatar"
@@ -494,24 +500,26 @@ const Discussion = () => {
                       <button
                         onClick={() => handleAddComment(tweet._id)}
                         disabled={!commentText[tweet._id]?.trim()}
-                        className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium disabled:opacity-50"
                       >
                         <Send size={14} />
                       </button>
                     </div>
                   </div>
+
+                  {/* 👇 2. New Recursive List */}
                   {loadingComments[tweet._id] ? (
                     <div className="text-xs text-slate-400">
                       Loading comments...
                     </div>
                   ) : tweetComments[tweet._id]?.length > 0 ? (
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
                       {getTopLevelComments(tweet._id).map((comment) => (
-                        <CommentThread
+                        // ✅ Use the new CommentItem here
+                        <CommentItem
                           key={comment._id}
-                          tweet={tweet}
+                          tweetId={tweet._id}
                           comment={comment}
-                          depth={0}
                         />
                       ))}
                     </div>

@@ -133,7 +133,7 @@ const PostCard = ({ post }) => {
             </div>
             {post.offer && (
               <div className="hidden sm:flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs font-bold text-green-700 border border-green-100 whitespace-nowrap">
-                <IndianRupee size={10} /> {post.offer}
+                <IndianRupee size={10} /> {post.offerDetails}
               </div>
             )}
           </div>

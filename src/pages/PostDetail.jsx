@@ -136,7 +136,7 @@ const PostDetail = () => {
                 <Building2 size={200} />
               </div>
 
-              {/* ✅ MOVED EDIT/DELETE BUTTONS HERE (Top Right of Blue Box) */}
+              {/*EDIT/DELETE BUTTON (Top Right of Blue Box) */}
               {(user?._id === post.author._id || user?.name === post.author.name) && (
                 <div className="absolute top-4 right-4 z-20 flex gap-2">
                   <button
@@ -233,7 +233,7 @@ const PostDetail = () => {
                         </div>
                       )}
                     </div>
-                    {post.offer && (
+                    {post.offerDetails && (
                       <div className="mb-8">
                         <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
                           <div className="w-1 h-6 bg-green-500 rounded-full"></div>

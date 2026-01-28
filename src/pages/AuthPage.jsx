@@ -103,7 +103,7 @@ const AuthPage = ({ type }) => {
         <div className="bg-slate-900 p-6 text-center">
           <GraduationCap className="text-emerald-400 mx-auto mb-2" size={40} />
           <h2 className="text-2xl font-bold text-white">
-            {isLogin ? "Welcome Back" : "Join NIT Connect"}
+            {isLogin ? "Welcome Back" : "Join Campus Diary"}
           </h2>
           <p className="text-slate-400 text-sm">
             {isLogin

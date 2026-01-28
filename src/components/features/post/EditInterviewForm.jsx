@@ -22,7 +22,7 @@ const EditInterviewForm = ({ post, onCancel, onSuccess }) => {
       type: "Full Time",
       rounds: [],
       hr: "",
-      offer: "",
+      offerDetails: "",
       tips: "",
       interviewDate: "",
     },
@@ -43,7 +43,7 @@ const EditInterviewForm = ({ post, onCancel, onSuccess }) => {
         type: post.type || "Full Time",
         rounds: post.rounds || [],
         hr: post.hrRound || "",
-        offer: post.offer || "",
+        offerDetails: post.offerDetails || post.offer || "",
         tips: post.tips || "",
         interviewDate: post.interviewDate || "",
       });
@@ -215,7 +215,7 @@ const EditInterviewForm = ({ post, onCancel, onSuccess }) => {
               Offer (Optional)
             </label>
             <input
-              {...register("offer")}
+              {...register("offerDetails")}
               type="text"
               className="w-full p-3 bg-green-50/50 border border-green-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
               placeholder="12 LPA"

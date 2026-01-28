@@ -113,16 +113,26 @@ const PostCard = ({ post }) => {
             </span>
           </div>
 
-          {/* Title */}
-          <h3 className="text-lg md:text-xl font-bold text-slate-800 group-hover:text-emerald-700 transition-colors mb-1 truncate">
-            {post.company}
-          </h3>
+          {/* Company + Offer */}
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h3 className="text-lg md:text-xl font-bold text-slate-800 group-hover:text-emerald-700 transition-colors truncate">
+              {post.company}
+            </h3>
 
+            {post.offerDetails && (
+              <div className="flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-semibold text-emerald-700 border border-emerald-100 shadow-sm whitespace-nowrap">
+                <IndianRupee size={12} />
+                <span>{post.offerDetails}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Role */}
           <p className="text-sm text-slate-500 font-medium mb-4 truncate">
             {post.role}
           </p>
 
-          {/* Author + Offer + Interview */}
+          {/* Author + Interview */}
           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
             <img
               src={AVATAR_MAP[post.author?.avatar] || AVATAR_MAP["a1"]}
@@ -138,27 +148,13 @@ const PostCard = ({ post }) => {
               <p className="text-xs text-slate-500 truncate">{post.type}</p>
             </div>
 
-            {/* Offer + Interview */}
-            <div className="flex flex-col items-end gap-1.5 min-w-[90px] text-right">
-  
-              {/* Offer Badge */}
-              {post.offerDetails && (
-                <div className="flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-semibold text-emerald-700 border border-emerald-100 shadow-sm">
-                  <IndianRupee size={12} />
-                  <span>{post.offerDetails}</span>
-                </div>
-              )}
-
-              {/* Interview Date */}
-              {post.interviewDate && (
-                <div className="flex items-center gap-1 text-[11px] text-slate-500 transition-all duration-300 group-hover:translate-y-1">
-                  <Calendar size={12} />
-                  <span>{post.interviewDate}</span>
-                </div>
-              )}
-
-            </div>
-
+            {/* Interview Date */}
+            {post.interviewDate && (
+              <div className="flex items-center gap-1 text-[11px] text-slate-500 transition-all duration-300 group-hover:translate-y-1 whitespace-nowrap">
+                <Calendar size={12} />
+                <span>{post.interviewDate}</span>
+              </div>
+            )}
           </div>
         </div>
 

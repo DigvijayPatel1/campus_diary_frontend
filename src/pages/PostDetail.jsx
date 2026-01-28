@@ -248,7 +248,7 @@ const PostDetail = () => {
                               CTC / Stipend Offered
                             </p>
                             <p className="text-lg font-bold text-slate-800">
-                              {post.offer}
+                              {post.offerDetails}
                             </p>
                           </div>
                         </div>

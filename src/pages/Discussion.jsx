@@ -188,7 +188,6 @@ const Discussion = () => {
         [replyKey]: "",
       }));
       setReplyingTo(null);
-      // Force re-render by triggering state update
       setLoadingComments((prev) => ({ ...prev, [tweetId]: false }));
     } catch (error) {
       console.error("Failed to add reply:", error);
@@ -224,7 +223,9 @@ const Discussion = () => {
 
     return (
       <div
-        className={`flex flex-col ${depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"}`}
+        className={`flex flex-col ${
+          depth > 0 ? "ml-8 md:ml-12 border-l-2 border-slate-100 pl-3 mt-2" : "mt-4"
+        }`}
       >
         <div className="flex gap-3 group/comment">
           {/* Avatar */}
@@ -233,7 +234,7 @@ const Discussion = () => {
               navigate(
                 comment.author?._id === user?._id
                   ? "/profile"
-                  : `/user/${comment.author?._id}`,
+                  : `/user/${comment.author?._id}`
               )
             }
             className="shrink-0 hover:opacity-80"
@@ -289,7 +290,6 @@ const Discussion = () => {
                   autoFocus
                 />
                 <button
-                  // Note: You need to implement handleReplySubmit (see step 3)
                   onClick={() => handleReplySubmit(tweetId, comment._id)}
                   className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
                 >
